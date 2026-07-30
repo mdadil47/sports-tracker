@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { signIn } from "@/auth";
 
 export default function Home() {
   return (
@@ -59,7 +60,11 @@ export default function Home() {
             Documentation
           </a>
         </div>
+        <form action={async () => { "use server"; await signIn("google"); }}>
+  <button type="submit">Sign in with Google</button>
+</form>
       </main>
     </div>
+  
   );
 }
