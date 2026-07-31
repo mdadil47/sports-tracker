@@ -2,12 +2,14 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="p-8 max-w-2xl mx-auto text-center">
-      <h1 className="text-3xl font-bold mb-4 text-[var(--foreground)]">Live Sports Tracker</h1>
-      <p className="text-[var(--muted)] mb-8">
+    <div className="p-4 sm:p-8 max-w-2xl mx-auto text-center">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-[var(--foreground)]">
+        Live Sports Tracker
+      </h1>
+      <p className="text-[var(--muted)] mb-8 text-sm sm:text-base">
         Follow your favorite teams, save them to your profile, and track today's matches.
       </p>
-      <div className="flex gap-4 justify-center">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
         <Link
           href="/football"
           className="bg-[var(--surface)] border border-[var(--border)] text-[var(--foreground)] px-6 py-3 rounded hover:bg-[var(--surface-hover)]"
