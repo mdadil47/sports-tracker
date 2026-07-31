@@ -49,9 +49,9 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4 text-[var(--foreground)]">Find a Team</h1>
-      <form onSubmit={handleSearch} className="flex gap-2 mb-6">
+    <div className="p-4 sm:p-8 max-w-2xl mx-auto">
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 text-[var(--foreground)]">Find a Team</h1>
+      <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 mb-6">
         <input
           type="text"
           value={query}
@@ -59,7 +59,10 @@ export default function SearchPage() {
           placeholder="e.g. Arsenal, Lakers, Mumbai Indians"
           className="flex-1 border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] rounded px-3 py-2 placeholder:text-[var(--muted)]"
         />
-        <button type="submit" className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-4 py-2 rounded">
+        <button
+          type="submit"
+          className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-4 py-2 rounded"
+        >
           Search
         </button>
       </form>
@@ -70,7 +73,7 @@ export default function SearchPage() {
         {teams.map((team) => (
           <li
             key={team.idTeam}
-            className="flex items-center gap-3 border border-[var(--border)] bg-[var(--surface)] rounded p-3"
+            className="flex flex-col sm:flex-row sm:items-center gap-3 border border-[var(--border)] bg-[var(--surface)] rounded p-3"
           >
             <img src={team.strTeamBadge} alt={team.strTeam} className="w-10 h-10" />
             <div className="flex-1">
@@ -80,7 +83,7 @@ export default function SearchPage() {
             <button
               onClick={() => handleSave(team)}
               disabled={savedIds.includes(team.idTeam)}
-              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-3 py-1 rounded text-sm disabled:bg-gray-600"
+              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 self-start sm:self-auto"
             >
               {savedIds.includes(team.idTeam) ? "Saved" : "Save"}
             </button>

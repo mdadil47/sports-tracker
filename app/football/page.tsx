@@ -1,49 +1,64 @@
-import { getEventsByDay } from "@/lib/sportsApi";
+import { getEventsByDay, getUpcomingLeagueEvents } from "@/lib/sportsApi";
 import { FOOTBALL_LEAGUES } from "@/lib/leagues";
 
-export default async function FootballPage() {
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+function MatchRow({ event }: { event: any }) {
+  return (
+    <div className="bg-[var(--surface)] border border-[var(--border)] rounded p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
+      <span className="text-[var(--foreground)] text-sm sm:text-base">
+        {event.strHomeTeam} vs {event.strAwayTeam}
+      </span>
+      <span className="text-[var(--muted)] text-sm">
+        {event.intHomeScore !== null
+          ? `${event.intHomeScore} - ${event.intAwayScore}`
+          : `${event.dateEvent} ${event.strTime ?? ""}`}
+      </span>
+    </div>
+  );
+}
 
-  const leaguesWithEvents = await Promise.all(
+export default async function FootballPage() {
+  const today = new Date().toISOString().split("T")[0];
+
+  const leaguesData = await Promise.all(
     FOOTBALL_LEAGUES.map(async (league) => ({
       ...league,
-      events: await getEventsByDay(today, league.id),
+      todayEvents: await getEventsByDay(today, league.id),
+      upcomingEvents: await getUpcomingLeagueEvents(league.id),
     }))
   );
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-[var(--foreground)]">⚽ Football — Today</h1>
+    <div className="p-4 sm:p-8 max-w-3xl mx-auto">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-[var(--foreground)]">⚽ Football</h1>
 
-      {leaguesWithEvents.every((l) => l.events.length === 0) && (
-        <p className="text-[var(--muted)]">No matches scheduled today across tracked leagues.</p>
-      )}
+      <div className="space-y-10">
+        {leaguesData.map((league) => (
+          <div key={league.id}>
+            <h2 className="text-lg font-semibold mb-3 text-[var(--foreground)]">{league.name}</h2>
 
-      <div className="space-y-8">
-        {leaguesWithEvents.map((league) =>
-          league.events.length > 0 ? (
-            <div key={league.id}>
-              <h2 className="text-lg font-semibold mb-3 text-[var(--foreground)]">{league.name}</h2>
-              <div className="space-y-2">
-                {league.events.map((event: any) => (
-                  <div
-                    key={event.idEvent}
-                    className="bg-[var(--surface)] border border-[var(--border)] rounded p-4 flex items-center justify-between"
-                  >
-                    <span className="text-[var(--foreground)]">
-                      {event.strHomeTeam} vs {event.strAwayTeam}
-                    </span>
-                    <span className="text-[var(--muted)] text-sm">
-                      {event.intHomeScore !== null
-                        ? `${event.intHomeScore} - ${event.intAwayScore}`
-                        : event.strTime}
-                    </span>
-                  </div>
-                ))}
-              </div>
+            {league.todayEvents.length > 0 && (
+              <>
+                <p className="text-sm text-[var(--accent)] mb-2">Today</p>
+                <div className="space-y-2 mb-4">
+                  {league.todayEvents.map((event: any) => (
+                    <MatchRow key={event.idEvent} event={event} />
+                  ))}
+                </div>
+              </>
+            )}
+
+            <p className="text-sm text-[var(--muted)] mb-2">Upcoming Fixtures</p>
+            <div className="space-y-2">
+              {league.upcomingEvents.length > 0 ? (
+                league.upcomingEvents
+                  .slice(0, 5)
+                  .map((event: any) => <MatchRow key={event.idEvent} event={event} />)
+              ) : (
+                <p className="text-sm text-[var(--muted)]">No upcoming fixtures found.</p>
+              )}
             </div>
-          ) : null
-        )}
+          </div>
+        ))}
       </div>
     </div>
   );

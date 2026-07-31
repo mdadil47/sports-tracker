@@ -22,8 +22,8 @@ export default async function DashboardPage() {
   );
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-[var(--foreground)]">Your Teams</h1>
+    <div className="p-4 sm:p-8 max-w-2xl mx-auto">
+      <h1 className="text-xl sm:text-2xl font-bold mb-6 text-[var(--foreground)]">Your Teams</h1>
 
       {teamsWithEvents.length === 0 && (
         <p className="text-[var(--muted)]">
@@ -47,8 +47,8 @@ export default async function DashboardPage() {
             ) : (
               <ul className="text-sm space-y-1 text-[var(--foreground)]">
                 {team.upcomingEvents.slice(0, 3).map((event: any) => (
-                  <li key={event.idEvent}>
-                    {event.strHomeTeam} vs {event.strAwayTeam} —{" "}
+                  <li key={event.idEvent} className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                    <span>{event.strHomeTeam} vs {event.strAwayTeam}</span>
                     <span className="text-[var(--muted)]">
                       {event.dateEvent} {event.strTime}
                     </span>

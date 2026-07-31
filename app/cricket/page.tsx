@@ -3,8 +3,8 @@ import { CRICKET_LEAGUES } from "@/lib/leagues";
 
 function MatchRow({ event }: { event: any }) {
   return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded p-4 flex items-center justify-between">
-      <span className="text-[var(--foreground)]">
+    <div className="bg-[var(--surface)] border border-[var(--border)] rounded p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
+      <span className="text-[var(--foreground)] text-sm sm:text-base">
         {event.strHomeTeam} vs {event.strAwayTeam}
       </span>
       <span className="text-[var(--muted)] text-sm">
@@ -28,8 +28,8 @@ export default async function CricketPage() {
   );
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-[var(--foreground)]">🏏 Cricket</h1>
+<div className="p-4 sm:p-8 max-w-3xl mx-auto">
+  <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-[var(--foreground)]">🏏 Cricket</h1>
 
       <div className="space-y-10">
         {leaguesData.map((league) => (
