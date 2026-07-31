@@ -13,6 +13,7 @@ export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -23,6 +24,28 @@ export default function SearchPage() {
     const data = await res.json();
     setTeams(data);
     setLoading(false);
+  }
+
+  async function handleSave(team: Team) {
+    const res = await fetch("/api/saved-teams", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        teamId: team.idTeam,
+        teamName: team.strTeam,
+        teamLeague: team.strLeague,
+        teamBadge: team.strTeamBadge,
+      }),
+    });
+
+    if (res.ok) {
+      setSavedIds((prev) => [...prev, team.idTeam]);
+    } else if (res.status === 401) {
+      alert("Please sign in first to save teams.");
+    } else {
+      const data = await res.json();
+      alert(data.error || "Failed to save team");
+    }
   }
 
   return (
@@ -47,10 +70,17 @@ export default function SearchPage() {
         {teams.map((team) => (
           <li key={team.idTeam} className="flex items-center gap-3 border rounded p-3">
             <img src={team.strTeamBadge} alt={team.strTeam} className="w-10 h-10" />
-            <div>
+            <div className="flex-1">
               <p className="font-semibold">{team.strTeam}</p>
               <p className="text-sm text-gray-500">{team.strLeague}</p>
             </div>
+            <button
+              onClick={() => handleSave(team)}
+              disabled={savedIds.includes(team.idTeam)}
+              className="bg-green-600 text-white px-3 py-1 rounded text-sm disabled:bg-gray-400"
+            >
+              {savedIds.includes(team.idTeam) ? "Saved" : "Save"}
+            </button>
           </li>
         ))}
       </ul>
