@@ -50,34 +50,37 @@ export default function SearchPage() {
 
   return (
     <div className="p-8 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Find a Team</h1>
+      <h1 className="text-2xl font-bold mb-4 text-[var(--foreground)]">Find a Team</h1>
       <form onSubmit={handleSearch} className="flex gap-2 mb-6">
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="e.g. Arsenal, Lakers, Yankees"
-          className="flex-1 border rounded px-3 py-2"
+          placeholder="e.g. Arsenal, Lakers, Mumbai Indians"
+          className="flex-1 border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] rounded px-3 py-2 placeholder:text-[var(--muted)]"
         />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+        <button type="submit" className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-4 py-2 rounded">
           Search
         </button>
       </form>
 
-      {loading && <p>Searching...</p>}
+      {loading && <p className="text-[var(--muted)]">Searching...</p>}
 
       <ul className="space-y-3">
         {teams.map((team) => (
-          <li key={team.idTeam} className="flex items-center gap-3 border rounded p-3">
+          <li
+            key={team.idTeam}
+            className="flex items-center gap-3 border border-[var(--border)] bg-[var(--surface)] rounded p-3"
+          >
             <img src={team.strTeamBadge} alt={team.strTeam} className="w-10 h-10" />
             <div className="flex-1">
-              <p className="font-semibold">{team.strTeam}</p>
-              <p className="text-sm text-gray-500">{team.strLeague}</p>
+              <p className="font-semibold text-[var(--foreground)]">{team.strTeam}</p>
+              <p className="text-sm text-[var(--muted)]">{team.strLeague}</p>
             </div>
             <button
               onClick={() => handleSave(team)}
               disabled={savedIds.includes(team.idTeam)}
-              className="bg-green-600 text-white px-3 py-1 rounded text-sm disabled:bg-gray-400"
+              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-3 py-1 rounded text-sm disabled:bg-gray-600"
             >
               {savedIds.includes(team.idTeam) ? "Saved" : "Save"}
             </button>
