@@ -6,3 +6,8 @@ export async function searchTeams(name: string) {
   const data = await res.json();
   return data.teams ?? [];
 }
+export async function getUpcomingEvents(teamId: string) {
+  const res = await fetch(`${BASE_URL}/eventsnext.php?id=${teamId}`);
+  const data = await res.json();
+  return data.events ?? [];
+}
