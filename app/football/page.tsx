@@ -2,7 +2,7 @@ import { getEventsByDay, getUpcomingLeagueEvents } from "@/lib/sportsApi";
 import { FOOTBALL_LEAGUES } from "@/lib/leagues";
 import DateNav from "@/components/DateNav";
 import Link from "next/link";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Volleyball } from "lucide-react";
 
 function MatchRow({ event }: { event: any }) {
   const isLive = event.strStatus && !["NS", "FT", "Match Finished"].includes(event.strStatus);
@@ -61,7 +61,10 @@ export default async function FootballPage({
   return (
     <div className="p-4 sm:p-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">⚽ Football</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+          <Volleyball className="w-7 h-7 text-[var(--gradient-end)]" />
+          Football
+        </h1>
         <Link
           href="/football/standings"
           className="text-sm text-[var(--gradient-end)] hover:underline flex items-center gap-1"

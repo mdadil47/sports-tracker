@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 function shiftDate(dateStr: string, days: number) {
   const d = new Date(dateStr);
@@ -16,35 +17,44 @@ export default function DateNav({ currentDate }: { currentDate: string }) {
     router.push(`${pathname}?date=${date}`);
   }
 
+  const isToday = currentDate === new Date().toISOString().split("T")[0];
+
   return (
-    <div className="flex items-center gap-3 mb-6">
+    <div className="flex items-center justify-center gap-2 mb-6 bg-[var(--surface)] border border-[var(--border)] rounded-full p-1.5 w-fit mx-auto">
       <button
         onClick={() => goTo(shiftDate(currentDate, -1))}
-        className="border border-[var(--border)] text-[var(--foreground)] rounded px-3 py-1 hover:bg-[var(--surface-hover)]"
+        className="p-2 rounded-full hover:bg-[var(--surface-hover)] transition-colors text-[var(--foreground)]"
+        aria-label="Previous day"
       >
-        ← Prev
+        <ChevronLeft className="w-4 h-4" />
       </button>
 
-      <input
-        type="date"
-        value={currentDate}
-        onChange={(e) => goTo(e.target.value)}
-        className="border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] rounded px-3 py-1"
-      />
+      <label className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--surface-hover)] text-sm cursor-pointer">
+        <Calendar className="w-4 h-4 text-[var(--muted)]" />
+        <input
+          type="date"
+          value={currentDate}
+          onChange={(e) => goTo(e.target.value)}
+          className="bg-transparent outline-none text-[var(--foreground)] [color-scheme:dark]"
+        />
+      </label>
 
       <button
         onClick={() => goTo(shiftDate(currentDate, 1))}
-        className="border border-[var(--border)] text-[var(--foreground)] rounded px-3 py-1 hover:bg-[var(--surface-hover)]"
+        className="p-2 rounded-full hover:bg-[var(--surface-hover)] transition-colors text-[var(--foreground)]"
+        aria-label="Next day"
       >
-        Next →
+        <ChevronRight className="w-4 h-4" />
       </button>
 
-      <button
-        onClick={() => goTo(new Date().toISOString().split("T")[0])}
-        className="text-sm text-[var(--accent)] hover:underline"
-      >
-        Today
-      </button>
+      {!isToday && (
+        <button
+          onClick={() => goTo(new Date().toISOString().split("T")[0])}
+          className="ml-1 text-xs gradient-bg text-white px-3 py-1.5 rounded-full font-medium hover:opacity-90 transition-opacity"
+        >
+          Today
+        </button>
+      )}
     </div>
   );
 }

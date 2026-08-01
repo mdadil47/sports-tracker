@@ -2,7 +2,9 @@ import { getEventsByDay, getUpcomingLeagueEvents, getCombinedUpcomingEvents } fr
 import { CRICKET_LEAGUES, INTERNATIONAL_CRICKET_TEAMS } from "@/lib/leagues";
 import DateNav from "@/components/DateNav";
 import Link from "next/link";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Icon } from "lucide-react";
+import { cricketBall } from "@lucide/lab";
+
 
 function MatchRow({ event }: { event: any }) {
   const isLive = event.strStatus && !["NS", "FT", "Match Finished"].includes(event.strStatus);
@@ -65,7 +67,10 @@ export default async function CricketPage({
   return (
     <div className="p-4 sm:p-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">🏏 Cricket</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-center flex items-center justify-center gap-2">
+ <Icon iconNode={cricketBall} className="w-7 h-7 text-[var(--gradient-end)]" />
+  Cricket
+</h1>
         <Link
           href="/cricket/standings"
           className="text-sm text-[var(--gradient-end)] hover:underline flex items-center gap-1"
