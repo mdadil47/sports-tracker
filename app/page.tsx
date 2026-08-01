@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Search, TrendingUp } from "lucide-react";
+import { Search, TrendingUp, Volleyball, Icon } from "lucide-react";
+import { cricketBall } from "@lucide/lab";
 
 export default function Home() {
   return (
@@ -39,7 +40,7 @@ export default function Home() {
             href="/football"
             className="card-hover bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 text-left"
           >
-            <p className="text-2xl mb-1">⚽</p>
+            <Volleyball className="w-7 h-7 mb-2 text-[var(--gradient-end)]" />
             <p className="font-semibold">Football</p>
             <p className="text-sm text-[var(--muted)]">EPL, La Liga & more</p>
           </Link>
@@ -47,7 +48,7 @@ export default function Home() {
             href="/cricket"
             className="card-hover bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 text-left"
           >
-            <p className="text-2xl mb-1">🏏</p>
+            <Icon iconNode={cricketBall} className="w-7 h-7 mb-2 text-[var(--gradient-end)]" />
             <p className="font-semibold">Cricket</p>
             <p className="text-sm text-[var(--muted)]">IPL, Big Bash & more</p>
           </Link>
