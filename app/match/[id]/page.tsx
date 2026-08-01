@@ -1,4 +1,4 @@
-import { getEventById, getLineup } from "@/lib/sportsApi";
+import { getEventById, getLineup, getEventStats } from "@/lib/sportsApi";
 import { notFound } from "next/navigation";
 import { MapPin, Calendar } from "lucide-react";
 
@@ -7,7 +7,26 @@ function classifyPosition(pos: string): "GK" | "DEF" | "MID" | "FWD" {
   if (p.includes("keeper")) return "GK";
   if (p.includes("back") || p.includes("defender") || p.includes("centre-back") || p.includes("center-back")) return "DEF";
   if (p.includes("forward") || p.includes("striker")) return "FWD";
-  return "MID"; // covers midfield, wing, attacking mid, etc.
+  return "MID";
+}
+
+function StatBar({ label, home, away }: { label: string; home: number; away: number }) {
+  const total = home + away || 1;
+  const homePct = (home / total) * 100;
+
+  return (
+    <div className="mb-4">
+      <div className="flex justify-between text-sm mb-1">
+        <span className="font-semibold">{home}</span>
+        <span className="text-[var(--muted)] text-xs">{label}</span>
+        <span className="font-semibold">{away}</span>
+      </div>
+      <div className="flex h-2 rounded-full overflow-hidden bg-[var(--surface-hover)]">
+        <div className="gradient-bg" style={{ width: `${homePct}%` }} />
+        <div className="bg-[var(--border)]" style={{ width: `${100 - homePct}%` }} />
+      </div>
+    </div>
+  );
 }
 
 function FormationPitch({ players, teamName }: { players: any[]; teamName: string }) {
@@ -19,9 +38,9 @@ function FormationPitch({ players, teamName }: { players: any[]; teamName: strin
   return (
     <div>
       <div className="text-center mb-3">
-  <h2 className="text-lg font-semibold">{teamName}</h2>
-  <p className="text-xs text-[var(--muted)]">Featured Players</p>
-</div>
+        <h2 className="text-lg font-semibold">{teamName}</h2>
+        <p className="text-xs text-[var(--muted)]">Featured Players</p>
+      </div>
       <div
         className="relative rounded-2xl p-4 sm:p-6 flex flex-col justify-between gap-4"
         style={{
@@ -29,7 +48,6 @@ function FormationPitch({ players, teamName }: { players: any[]; teamName: strin
           minHeight: "420px",
         }}
       >
-        {/* Pitch markings */}
         <div className="absolute inset-4 border border-white/20 rounded pointer-events-none" />
         <div className="absolute top-1/2 left-4 right-4 border-t border-white/20 pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 w-16 h-16 -translate-x-1/2 -translate-y-1/2 border border-white/20 rounded-full pointer-events-none" />
@@ -58,7 +76,10 @@ function FormationPitch({ players, teamName }: { players: any[]; teamName: strin
 function SimpleSquadList({ players, teamName }: { players: any[]; teamName: string }) {
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-3">{teamName}</h2>
+      <div className="mb-3">
+        <h2 className="text-lg font-semibold">{teamName}</h2>
+        <p className="text-xs text-[var(--muted)]">Featured Players</p>
+      </div>
       <div className="space-y-2">
         {players.map((player) => (
           <div key={player.idLineup} className="flex items-center gap-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-2">
@@ -88,13 +109,13 @@ export default async function MatchDetailPage({
     notFound();
   }
 
-  const lineup = await getLineup(id);
+  const [lineup, stats] = await Promise.all([getLineup(id), getEventStats(id)]);
   const homeLineup = lineup.filter((p: any) => p.strHome === "Yes" && p.strSubstitute === "No");
   const awayLineup = lineup.filter((p: any) => p.strHome === "No" && p.strSubstitute === "No");
   const isFootball = event.strSport === "Soccer";
 
   return (
-    <div className="p-4 sm:p-8 max-w-3xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-2xl mx-auto">
       {/* Score header */}
       <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 mb-8 text-center">
         <p className="text-xs text-[var(--muted)] mb-4 uppercase tracking-wide">{event.strLeague}</p>
@@ -124,6 +145,16 @@ export default async function MatchDetailPage({
           )}
         </div>
       </div>
+
+      {/* Match Stats */}
+      {stats.length > 0 && (
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 mb-8">
+          <h2 className="text-lg font-semibold mb-4 text-center">Match Stats</h2>
+          {stats.map((stat: any) => (
+            <StatBar key={stat.idStatistic} label={stat.strStat} home={Number(stat.intHome)} away={Number(stat.intAway)} />
+          ))}
+        </div>
+      )}
 
       {/* Lineups */}
       {lineup.length > 0 ? (
