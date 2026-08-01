@@ -1,75 +1,134 @@
-import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
-import { getUpcomingEvents } from "@/lib/sportsApi";
-import { redirect } from "next/navigation";
+import { getEventsByDay, getUpcomingLeagueEvents, getCombinedUpcomingEvents } from "@/lib/sportsApi";
+import { CRICKET_LEAGUES, INTERNATIONAL_CRICKET_TEAMS } from "@/lib/leagues";
+import DateNav from "@/components/DateNav";
 import Link from "next/link";
-import UnsaveButton from "@/components/UnsaveButton";
+import { BarChart3, Icon } from "lucide-react";
+import { cricketBall } from "@lucide/lab";
 
-export default async function DashboardPage() {
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/");
-  }
+function MatchRow({ event }: { event: any }) {
+  const isLive = event.strStatus && !["NS", "FT", "Match Finished"].includes(event.strStatus);
+  const isFinished = event.intHomeScore !== null;
 
-  const savedTeams = await prisma.savedTeam.findMany({
-    where: { userId: (session.user as { id: string }).id },
-    orderBy: { createdAt: "desc" },
-  });
+  return (
+    <div className="card-hover bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 flex items-center justify-between gap-3">
+      <Link href={`/team/${event.idHomeTeam}`} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 hover:opacity-80">
+        <img src={event.strHomeTeamBadge} alt="" className="w-7 h-7 sm:w-8 sm:h-8 object-contain shrink-0" />
+        <span className="text-sm sm:text-base font-medium truncate">{event.strHomeTeam}</span>
+      </Link>
 
-  const teamsWithEvents = await Promise.all(
-    savedTeams.map(async (team) => ({
-      ...team,
-      upcomingEvents: await getUpcomingEvents(team.teamId),
+      <Link href={`/match/${event.idEvent}`} className="flex flex-col items-center px-2 shrink-0 hover:opacity-80">
+        {isLive && (
+          <span className="flex items-center gap-1 text-xs text-red-400 font-semibold mb-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+            LIVE
+          </span>
+        )}
+        <span className={isFinished ? "gradient-text font-bold text-sm sm:text-base" : "text-[var(--muted)] text-xs sm:text-sm"}>
+          {isFinished ? `${event.intHomeScore} - ${event.intAwayScore}` : event.strTime?.slice(0, 5) ?? "TBD"}
+        </span>
+        {!isFinished && (
+          <span className="text-[10px] text-[var(--muted)]">{event.dateEvent}</span>
+        )}
+      </Link>
+
+      <Link href={`/team/${event.idAwayTeam}`} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 justify-end hover:opacity-80">
+        <span className="text-sm sm:text-base font-medium truncate text-right">{event.strAwayTeam}</span>
+        <img src={event.strAwayTeamBadge} alt="" className="w-7 h-7 sm:w-8 sm:h-8 object-contain shrink-0" />
+      </Link>
+    </div>
+  );
+}
+
+export default async function CricketPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>;
+}) {
+  const params = await searchParams;
+  const selectedDate = params.date || new Date().toISOString().split("T")[0];
+  const isToday = selectedDate === new Date().toISOString().split("T")[0];
+
+  const leaguesData = await Promise.all(
+    CRICKET_LEAGUES.map(async (league) => ({
+      ...league,
+      dayEvents: await getEventsByDay(selectedDate, league.id),
+      upcomingEvents: isToday ? await getUpcomingLeagueEvents(league.id) : [],
     }))
   );
 
+  const internationalEvents = isToday
+    ? await getCombinedUpcomingEvents(INTERNATIONAL_CRICKET_TEAMS.map((t) => t.id))
+    : [];
+
   return (
-    <div className="p-4 sm:p-8 max-w-2xl mx-auto">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-1 tracking-tight">Your Teams</h1>
-      <p className="text-[var(--muted)] mb-8 text-sm">
-        {teamsWithEvents.length} team{teamsWithEvents.length !== 1 ? "s" : ""} followed
-      </p>
+    <div className="p-4 sm:p-8 max-w-3xl mx-auto">
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+          <Icon iconNode={cricketBall} className="w-7 h-7 text-[var(--gradient-end)]" />
+          Cricket
+        </h1>
+        <Link
+          href="/cricket/standings"
+          className="text-sm text-[var(--gradient-end)] hover:underline flex items-center gap-1"
+        >
+          <BarChart3 className="w-4 h-4" />
+          Standings
+        </Link>
+      </div>
 
-      {teamsWithEvents.length === 0 && (
-        <div className="text-center py-16 border border-dashed border-[var(--border)] rounded-2xl">
-          <p className="text-[var(--muted)] mb-4">No saved teams yet.</p>
-          <Link href="/search" className="gradient-bg text-white px-5 py-2.5 rounded-full font-medium inline-block hover:opacity-90 transition-opacity">
-            Find a Team
-          </Link>
-        </div>
-      )}
+      <div className="mt-4">
+        <DateNav currentDate={selectedDate} />
+      </div>
 
-      <div className="space-y-6">
-        {teamsWithEvents.map((team) => (
-          <div key={team.id} className="card-hover border border-[var(--border)] bg-[var(--surface)] rounded-2xl p-5">
-            <Link href={`/team/${team.teamId}`} className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-white/5 border border-[var(--border)] flex items-center justify-center overflow-hidden shrink-0">
-      <img src={team.teamBadge ?? ""} alt={team.teamName} className="w-8 h-8 object-contain" />
-    </div>
-    <div>
-      <p className="font-semibold hover:underline">{team.teamName}</p>
-      <p className="text-sm text-[var(--muted)]">{team.teamLeague}</p>
-    </div>
-            </Link>
+      <div className="space-y-10">
+        {isToday && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-5 rounded-full gradient-bg" />
+              <h2 className="text-lg font-semibold">International</h2>
+            </div>
+            <div className="space-y-2">
+              {internationalEvents.length > 0 ? (
+                internationalEvents.slice(0, 5).map((event: any) => (
+                  <MatchRow key={event.idEvent} event={event} />
+                ))
+              ) : (
+                <p className="text-sm text-[var(--muted)]">No upcoming international matches found.</p>
+              )}
+            </div>
+          </div>
+        )}
 
-            {team.upcomingEvents.length === 0 ? (
-              <p className="text-sm text-[var(--muted)]">No upcoming matches found.</p>
-            ) : (
-              <ul className="text-sm space-y-2">
-                {team.upcomingEvents.slice(0, 3).map((event: any) => (
-                  <li key={event.idEvent}>
-  <Link
-    href={`/match/${event.idEvent}`}
-    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 bg-[var(--background)] rounded-lg px-3 py-2 hover:bg-[var(--surface-hover)] transition-colors"
-  >
-    <span>{event.strHomeTeam} vs {event.strAwayTeam}</span>
-    <span className="text-[var(--muted)] text-xs">
-      {event.dateEvent} {event.strTime}
-    </span>
-  </Link>
-</li>
-                ))}
-              </ul>
+        {leaguesData.map((league) => (
+          <div key={league.id}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-5 rounded-full gradient-bg" />
+              <h2 className="text-lg font-semibold">{league.name}</h2>
+            </div>
+
+            <div className="space-y-2 mb-4">
+              {league.dayEvents.length > 0 ? (
+                league.dayEvents.map((event: any) => (
+                  <MatchRow key={event.idEvent} event={event} />
+                ))
+              ) : (
+                <p className="text-sm text-[var(--muted)]">No matches on this date.</p>
+              )}
+            </div>
+
+            {isToday && (
+              <>
+                <p className="text-sm text-[var(--muted)] mb-2 uppercase tracking-wide">Upcoming Fixtures</p>
+                <div className="space-y-2">
+                  {league.upcomingEvents.length > 0 ? (
+                    league.upcomingEvents
+                      .slice(0, 5)
+                      .map((event: any) => <MatchRow key={event.idEvent} event={event} />)
+                  ) : (
+                    <p className="text-sm text-[var(--muted)]">No upcoming fixtures found.</p>
+                  )}
+                </div>
+              </>
             )}
           </div>
         ))}

@@ -1,5 +1,6 @@
 import { getTeamById, getLastEvents, getUpcomingEvents, getTeamRoster } from "@/lib/sportsApi";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { MapPin, TrendingUp, Calendar } from "lucide-react";
 
 function classifyPlayer(position: string, sport: string): string | null {
@@ -150,9 +151,10 @@ export default async function TeamDetailPage({
                     <p className="text-sm text-[var(--muted)] mb-2 uppercase tracking-wide">{group}</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {grouped[group].map((player: any) => (
-                        <div
+                        <Link
                           key={player.idPlayer}
-                          className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-2"
+                          href={`/player/${player.idPlayer}`}
+                          className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-2 hover:bg-[var(--surface-hover)] transition-colors"
                         >
                           <div className="w-8 h-8 rounded-full bg-[var(--surface-hover)] overflow-hidden shrink-0">
                             {player.strCutout && (
@@ -160,7 +162,7 @@ export default async function TeamDetailPage({
                             )}
                           </div>
                           <p className="text-xs font-medium truncate">{player.strPlayer}</p>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   </div>

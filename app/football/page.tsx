@@ -9,16 +9,13 @@ function MatchRow({ event }: { event: any }) {
   const isFinished = event.intHomeScore !== null;
 
   return (
-    <Link
-      href={`/match/${event.idEvent}`}
-      className="card-hover bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 flex items-center justify-between gap-3"
-    >
-      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+    <div className="card-hover bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 flex items-center justify-between gap-3">
+      <Link href={`/team/${event.idHomeTeam}`} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 hover:opacity-80">
         <img src={event.strHomeTeamBadge} alt="" className="w-7 h-7 sm:w-8 sm:h-8 object-contain shrink-0" />
         <span className="text-sm sm:text-base font-medium truncate">{event.strHomeTeam}</span>
-      </div>
+      </Link>
 
-      <div className="flex flex-col items-center px-2 shrink-0">
+      <Link href={`/match/${event.idEvent}`} className="flex flex-col items-center px-2 shrink-0 hover:opacity-80">
         {isLive && (
           <span className="flex items-center gap-1 text-xs text-red-400 font-semibold mb-1">
             <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
@@ -31,13 +28,13 @@ function MatchRow({ event }: { event: any }) {
         {!isFinished && (
           <span className="text-[10px] text-[var(--muted)]">{event.dateEvent}</span>
         )}
-      </div>
+      </Link>
 
-      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 justify-end">
+      <Link href={`/team/${event.idAwayTeam}`} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 justify-end hover:opacity-80">
         <span className="text-sm sm:text-base font-medium truncate text-right">{event.strAwayTeam}</span>
         <img src={event.strAwayTeamBadge} alt="" className="w-7 h-7 sm:w-8 sm:h-8 object-contain shrink-0" />
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 

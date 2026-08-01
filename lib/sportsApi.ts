@@ -87,3 +87,7 @@ export async function getTeamRoster(teamId: string) {
   const data = await safeFetch(`${BASE_URL}/lookup_all_players.php?id=${teamId}`);
   return data?.player ?? [];
 }
+export async function getPlayerById(playerId: string) {
+  const data = await safeFetch(`${BASE_URL}/lookupplayer.php?id=${playerId}`);
+  return data?.players?.[0] ?? null;
+}
