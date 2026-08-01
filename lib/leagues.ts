@@ -4,5 +4,6 @@ export const FOOTBALL_LEAGUES = [
 ];
 
 export const CRICKET_LEAGUES = [
-  { id: "4419", name: "Indian Premier League", season: "2026" },
+  { id: "4460", name: "Indian Premier League", season: "2026" },
+  { id: "4461", name: "Australian Big Bash League", season: "2026-2027" },
 ];
