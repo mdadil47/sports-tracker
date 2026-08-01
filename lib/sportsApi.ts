@@ -91,3 +91,7 @@ export async function getPlayerById(playerId: string) {
   const data = await safeFetch(`${BASE_URL}/lookupplayer.php?id=${playerId}`);
   return data?.players?.[0] ?? null;
 }
+export async function getPastLeagueEvents(leagueId: string) {
+  const data = await safeFetch(`${BASE_URL}/eventspastleague.php?id=${leagueId}`);
+  return data?.events ?? [];
+}

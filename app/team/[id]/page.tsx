@@ -99,15 +99,16 @@ export default async function TeamDetailPage({
             <div className="space-y-2">
               {lastEvents.length > 0 ? (
                 lastEvents.slice(0, 5).map((event: any) => (
-                  <div
+                  <Link
                     key={event.idEvent}
-                    className="card-hover bg-[var(--surface)] border border-[var(--border)] rounded-xl p-3 text-sm"
+                    href={`/match/${event.idEvent}`}
+                    className="card-hover bg-[var(--surface)] border border-[var(--border)] rounded-xl p-3 text-sm block hover:bg-[var(--surface-hover)] transition-colors"
                   >
                     <p>
                       {event.strHomeTeam} <span className="gradient-text font-semibold">{event.intHomeScore} - {event.intAwayScore}</span> {event.strAwayTeam}
                     </p>
                     <p className="text-[var(--muted)] text-xs mt-1">{event.dateEvent}</p>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <p className="text-sm text-[var(--muted)]">No recent results found.</p>
@@ -123,15 +124,16 @@ export default async function TeamDetailPage({
             <div className="space-y-2">
               {upcomingEvents.length > 0 ? (
                 upcomingEvents.slice(0, 5).map((event: any) => (
-                  <div
+                  <Link
                     key={event.idEvent}
-                    className="card-hover bg-[var(--surface)] border border-[var(--border)] rounded-xl p-3 text-sm"
+                    href={`/match/${event.idEvent}`}
+                    className="card-hover bg-[var(--surface)] border border-[var(--border)] rounded-xl p-3 text-sm block hover:bg-[var(--surface-hover)] transition-colors"
                   >
                     <p>{event.strHomeTeam} vs {event.strAwayTeam}</p>
                     <p className="text-[var(--muted)] text-xs mt-1">
                       {event.dateEvent} {event.strTime}
                     </p>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <p className="text-sm text-[var(--muted)]">No upcoming matches found.</p>

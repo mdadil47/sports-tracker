@@ -62,13 +62,19 @@ export default async function FootballPage({
           <Volleyball className="w-7 h-7 text-[var(--gradient-end)]" />
           Football
         </h1>
-        <Link
-          href="/football/standings"
-          className="text-sm text-[var(--gradient-end)] hover:underline flex items-center gap-1"
-        >
-          <BarChart3 className="w-4 h-4" />
-          Standings
-        </Link>
+          <Link
+    href="/football/results"
+    className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+  >
+    Results
+  </Link>
+  <Link
+    href="/football/standings"
+    className="text-sm text-[var(--gradient-end)] hover:underline flex items-center gap-1"
+  >
+    <BarChart3 className="w-4 h-4" />
+    Standings
+  </Link>
       </div>
 
       <div className="mt-4">
