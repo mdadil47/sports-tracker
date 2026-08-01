@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/Skeleton";
 interface Team {
   idTeam: string;
   strTeam: string;
-  strTeamBadge: string;
+  strBadge: string;
   strLeague: string;
 }
 
@@ -38,7 +38,7 @@ export default function SearchPage() {
         teamId: team.idTeam,
         teamName: team.strTeam,
         teamLeague: team.strLeague,
-        teamBadge: team.strTeamBadge,
+        teamBadge: team.strBadge,
       }),
     });
 
@@ -93,7 +93,7 @@ export default function SearchPage() {
             className="flex flex-col sm:flex-row sm:items-center gap-3 border border-[var(--border)] bg-[var(--surface)] rounded p-3"
           >
             <Link href={`/team/${team.idTeam}`} className="flex items-center gap-3 flex-1">
-              <img src={team.strTeamBadge} alt={team.strTeam} className="w-10 h-10" />
+              <img src={team.strBadge} alt={team.strTeam} className="w-10 h-10" />
               <div>
                 <p className="font-semibold text-[var(--foreground)] hover:underline">{team.strTeam}</p>
                 <p className="text-sm text-[var(--muted)]">{team.strLeague}</p>

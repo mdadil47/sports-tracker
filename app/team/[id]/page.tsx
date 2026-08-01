@@ -21,7 +21,7 @@ export default async function TeamDetailPage({
   return (
     <div className="p-4 sm:p-8 max-w-2xl mx-auto">
       <div className="flex items-center gap-4 mb-6">
-        <img src={team.strTeamBadge} alt={team.strTeam} className="w-16 h-16" />
+        <img src={team.strBadge} alt={team.strTeam} className="w-16 h-16" />
         <div>
           <h1 className="text-2xl font-bold text-[var(--foreground)]">{team.strTeam}</h1>
           <p className="text-[var(--muted)] text-sm">{team.strLeague}</p>
