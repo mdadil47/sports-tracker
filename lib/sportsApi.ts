@@ -52,3 +52,10 @@ export async function getLastEvents(teamId: string) {
   const data = await safeFetch(`${BASE_URL}/eventslast.php?id=${teamId}`);
   return data?.results ?? [];
 }
+export async function getTeamEventsToday(teamId: string) {
+  const today = new Date().toISOString().split("T")[0];
+  const upcoming = await getUpcomingEvents(teamId);
+  const last = await getLastEvents(teamId);
+  const all = [...upcoming, ...last];
+  return all.filter((event: any) => event.dateEvent === today);
+}
