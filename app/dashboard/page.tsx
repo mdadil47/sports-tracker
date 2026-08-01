@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getUpcomingEvents } from "@/lib/sportsApi";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -34,13 +35,13 @@ export default async function DashboardPage() {
       <div className="space-y-6">
         {teamsWithEvents.map((team) => (
           <div key={team.id} className="border border-[var(--border)] bg-[var(--surface)] rounded p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <img src={team.teamBadge ?? ""} alt={team.teamName} className="w-10 h-10" />
-              <div>
-                <p className="font-semibold text-[var(--foreground)]">{team.teamName}</p>
-                <p className="text-sm text-[var(--muted)]">{team.teamLeague}</p>
-              </div>
-            </div>
+            <Link href={`/team/${team.teamId}`} className="flex items-center gap-3 mb-3">
+  <img src={team.teamBadge ?? ""} alt={team.teamName} className="w-10 h-10" />
+  <div>
+    <p className="font-semibold text-[var(--foreground)] hover:underline">{team.teamName}</p>
+    <p className="text-sm text-[var(--muted)]">{team.teamLeague}</p>
+  </div>
+</Link>
 
             {team.upcomingEvents.length === 0 ? (
               <p className="text-sm text-[var(--muted)]">No upcoming matches found.</p>

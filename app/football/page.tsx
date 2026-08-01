@@ -1,6 +1,7 @@
 import { getEventsByDay, getUpcomingLeagueEvents } from "@/lib/sportsApi";
 import { FOOTBALL_LEAGUES } from "@/lib/leagues";
 import DateNav from "@/components/DateNav";
+import Link from "next/link";
 
 function MatchRow({ event }: { event: any }) {
   return (
@@ -38,7 +39,13 @@ export default async function FootballPage({
     <div className="p-4 sm:p-8 max-w-3xl mx-auto">
       <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-[var(--foreground)]">⚽ Football</h1>
 
-      <DateNav currentDate={selectedDate} />
+      <Link href="/football/standings" className="text-sm text-[var(--accent)] hover:underline">
+        View Standings →
+      </Link>
+
+      <div className="mt-4">
+        <DateNav currentDate={selectedDate} />
+      </div>
 
       <div className="space-y-10">
         {leaguesData.map((league) => (

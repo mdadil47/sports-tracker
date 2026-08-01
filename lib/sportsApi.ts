@@ -39,3 +39,16 @@ export async function getUpcomingLeagueEvents(leagueId: string) {
   const data = await safeFetch(`${BASE_URL}/eventsnextleague.php?id=${leagueId}`);
   return data?.events ?? [];
 }
+export async function getStandings(leagueId: string, season: string) {
+  const data = await safeFetch(`${BASE_URL}/lookuptable.php?l=${leagueId}&s=${season}`);
+  return data?.table ?? [];
+}
+export async function getTeamById(teamId: string) {
+  const data = await safeFetch(`${BASE_URL}/lookupteam.php?id=${teamId}`);
+  return data?.teams?.[0] ?? null;
+}
+
+export async function getLastEvents(teamId: string) {
+  const data = await safeFetch(`${BASE_URL}/eventslast.php?id=${teamId}`);
+  return data?.results ?? [];
+}

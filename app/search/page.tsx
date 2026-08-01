@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useToast } from "@/components/Toast";
+import { Skeleton } from "@/components/Skeleton";
 
 interface Team {
   idTeam: string;
@@ -14,6 +17,7 @@ export default function SearchPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
   const [savedIds, setSavedIds] = useState<string[]>([]);
+  const { showToast } = useToast();
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -40,11 +44,12 @@ export default function SearchPage() {
 
     if (res.ok) {
       setSavedIds((prev) => [...prev, team.idTeam]);
+      showToast(`${team.strTeam} saved!`, "success");
     } else if (res.status === 401) {
-      alert("Please sign in first to save teams.");
+      showToast("Please sign in first to save teams.", "error");
     } else {
       const data = await res.json();
-      alert(data.error || "Failed to save team");
+      showToast(data.error || "Failed to save team", "error");
     }
   }
 
@@ -67,7 +72,19 @@ export default function SearchPage() {
         </button>
       </form>
 
-      {loading && <p className="text-[var(--muted)]">Searching...</p>}
+      {loading && (
+  <div className="space-y-3">
+    {[1, 2, 3].map((i) => (
+      <div key={i} className="flex items-center gap-3 border border-[var(--border)] bg-[var(--surface)] rounded p-3">
+        <Skeleton className="w-10 h-10 rounded-full" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-3 w-20" />
+        </div>
+      </div>
+    ))}
+  </div>
+)}
 
       <ul className="space-y-3">
         {teams.map((team) => (
@@ -75,11 +92,13 @@ export default function SearchPage() {
             key={team.idTeam}
             className="flex flex-col sm:flex-row sm:items-center gap-3 border border-[var(--border)] bg-[var(--surface)] rounded p-3"
           >
-            <img src={team.strTeamBadge} alt={team.strTeam} className="w-10 h-10" />
-            <div className="flex-1">
-              <p className="font-semibold text-[var(--foreground)]">{team.strTeam}</p>
-              <p className="text-sm text-[var(--muted)]">{team.strLeague}</p>
-            </div>
+            <Link href={`/team/${team.idTeam}`} className="flex items-center gap-3 flex-1">
+              <img src={team.strTeamBadge} alt={team.strTeam} className="w-10 h-10" />
+              <div>
+                <p className="font-semibold text-[var(--foreground)] hover:underline">{team.strTeam}</p>
+                <p className="text-sm text-[var(--muted)]">{team.strLeague}</p>
+              </div>
+            </Link>
             <button
               onClick={() => handleSave(team)}
               disabled={savedIds.includes(team.idTeam)}
