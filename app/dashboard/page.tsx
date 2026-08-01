@@ -24,33 +24,44 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-2xl mx-auto">
-      <h1 className="text-xl sm:text-2xl font-bold mb-6 text-[var(--foreground)]">Your Teams</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-1 tracking-tight">Your Teams</h1>
+      <p className="text-[var(--muted)] mb-8 text-sm">
+        {teamsWithEvents.length} team{teamsWithEvents.length !== 1 ? "s" : ""} followed
+      </p>
 
       {teamsWithEvents.length === 0 && (
-        <p className="text-[var(--muted)]">
-          No saved teams yet. Go to Search to add some.
-        </p>
+        <div className="text-center py-16 border border-dashed border-[var(--border)] rounded-2xl">
+          <p className="text-[var(--muted)] mb-4">No saved teams yet.</p>
+          <Link href="/search" className="gradient-bg text-white px-5 py-2.5 rounded-full font-medium inline-block hover:opacity-90 transition-opacity">
+            Find a Team
+          </Link>
+        </div>
       )}
 
       <div className="space-y-6">
         {teamsWithEvents.map((team) => (
-          <div key={team.id} className="border border-[var(--border)] bg-[var(--surface)] rounded p-4">
-            <Link href={`/team/${team.teamId}`} className="flex items-center gap-3 mb-3">
-  <img src={team.teamBadge ?? ""} alt={team.teamName} className="w-10 h-10" />
-  <div>
-    <p className="font-semibold text-[var(--foreground)] hover:underline">{team.teamName}</p>
-    <p className="text-sm text-[var(--muted)]">{team.teamLeague}</p>
-  </div>
-</Link>
+          <div key={team.id} className="card-hover border border-[var(--border)] bg-[var(--surface)] rounded-2xl p-5">
+            <Link href={`/team/${team.teamId}`} className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-white/5 border border-[var(--border)] flex items-center justify-center overflow-hidden shrink-0">
+                <img src={team.teamBadge ?? ""} alt={team.teamName} className="w-8 h-8 object-contain" />
+              </div>
+              <div>
+                <p className="font-semibold hover:underline">{team.teamName}</p>
+                <p className="text-sm text-[var(--muted)]">{team.teamLeague}</p>
+              </div>
+            </Link>
 
             {team.upcomingEvents.length === 0 ? (
               <p className="text-sm text-[var(--muted)]">No upcoming matches found.</p>
             ) : (
-              <ul className="text-sm space-y-1 text-[var(--foreground)]">
+              <ul className="text-sm space-y-2">
                 {team.upcomingEvents.slice(0, 3).map((event: any) => (
-                  <li key={event.idEvent} className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                  <li
+                    key={event.idEvent}
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 bg-[var(--background)] rounded-lg px-3 py-2"
+                  >
                     <span>{event.strHomeTeam} vs {event.strAwayTeam}</span>
-                    <span className="text-[var(--muted)]">
+                    <span className="text-[var(--muted)] text-xs">
                       {event.dateEvent} {event.strTime}
                     </span>
                   </li>
