@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Search as SearchIcon } from "lucide-react";
 import { Skeleton } from "@/components/Skeleton";
@@ -27,22 +27,51 @@ export default function SearchPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  async function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    if (!query.trim()) return;
-
+  async function runSearch(searchQuery: string) {
+    if (!searchQuery.trim()) {
+      setTeams([]);
+      setPlayers([]);
+      return;
+    }
     setLoading(true);
     if (mode === "teams") {
-      const res = await fetch(`/api/teams/search?name=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/teams/search?name=${encodeURIComponent(searchQuery)}`);
       const data = await res.json();
       setTeams(data);
     } else {
-      const res = await fetch(`/api/players/search?name=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/players/search?name=${encodeURIComponent(searchQuery)}`);
       const data = await res.json();
       setPlayers(data);
     }
     setLoading(false);
+  }
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (query.trim().length < 2) {
+      setTeams([]);
+      setPlayers([]);
+      setShowSuggestions(false);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      runSearch(query);
+      setShowSuggestions(true);
+    }, 400);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, mode]);
+
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setShowSuggestions(false);
+    runSearch(query);
   }
 
   return (
@@ -50,11 +79,10 @@ export default function SearchPage() {
       <h1 className="text-2xl sm:text-3xl font-bold mb-2 tracking-tight text-center">Find a Team or Player</h1>
       <p className="text-[var(--muted)] mb-6 text-sm text-center">Search football and cricket teams or players.</p>
 
-      {/* Mode toggle */}
       <div className="flex justify-center mb-6">
         <div className="bg-[var(--surface)] border border-[var(--border)] rounded-full p-1 flex gap-1">
           <button
-            onClick={() => setMode("teams")}
+            onClick={() => { setMode("teams"); setQuery(""); setShowSuggestions(false); }}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
               mode === "teams" ? "gradient-bg text-white" : "text-[var(--muted)]"
             }`}
@@ -62,7 +90,7 @@ export default function SearchPage() {
             Teams
           </button>
           <button
-            onClick={() => setMode("players")}
+            onClick={() => { setMode("players"); setQuery(""); setShowSuggestions(false); }}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
               mode === "players" ? "gradient-bg text-white" : "text-[var(--muted)]"
             }`}
@@ -72,26 +100,76 @@ export default function SearchPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 mb-8">
-        <div className="relative flex-1">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted)]" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={mode === "teams" ? "e.g. Arsenal, Mumbai Indians" : "e.g. Bukayo Saka, Virat Kohli"}
-            className="w-full border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] rounded-full pl-10 pr-4 py-2.5 placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-end)]"
-          />
+      <form onSubmit={handleSearchSubmit} className="relative mb-8">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted)]" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => query.trim().length >= 2 && setShowSuggestions(true)}
+              placeholder={mode === "teams" ? "e.g. Arsenal, Mumbai Indians" : "e.g. Bukayo Saka, Virat Kohli"}
+              autoComplete="off"
+              className="w-full border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] rounded-full pl-10 pr-4 py-2.5 placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-end)]"
+            />
+          </div>
+          <button
+            type="submit"
+            className="gradient-bg text-white px-6 py-2.5 rounded-full font-medium hover:opacity-90 transition-opacity"
+          >
+            Search
+          </button>
         </div>
-        <button
-          type="submit"
-          className="gradient-bg text-white px-6 py-2.5 rounded-full font-medium hover:opacity-90 transition-opacity"
-        >
-          Search
-        </button>
+
+        {showSuggestions && query.trim().length >= 2 && (
+          <div className="absolute z-20 mt-2 w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-xl max-h-80 overflow-y-auto">
+            {loading && (
+              <div className="p-4 text-sm text-[var(--muted)]">Searching...</div>
+            )}
+            {!loading && mode === "teams" && teams.length === 0 && (
+              <div className="p-4 text-sm text-[var(--muted)]">No matches found.</div>
+            )}
+            {!loading && mode === "players" && players.length === 0 && (
+              <div className="p-4 text-sm text-[var(--muted)]">No matches found.</div>
+            )}
+            {!loading && mode === "teams" && teams.slice(0, 4).map((team) => (
+              <Link
+                key={team.idTeam}
+                href={`/team/${team.idTeam}`}
+                onClick={() => setShowSuggestions(false)}
+                className="flex items-center gap-3 p-3 hover:bg-[var(--surface-hover)] transition-colors border-b border-[var(--border)] last:border-b-0"
+              >
+                <img src={team.strBadge} alt={team.strTeam} className="w-8 h-8 object-contain shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">{team.strTeam}</p>
+                  <p className="text-xs text-[var(--muted)]">{team.strLeague}</p>
+                </div>
+              </Link>
+            ))}
+            {!loading && mode === "players" && players.slice(0, 4).map((player) => (
+              <Link
+                key={player.idPlayer}
+                href={`/player/${player.idPlayer}`}
+                onClick={() => setShowSuggestions(false)}
+                className="flex items-center gap-3 p-3 hover:bg-[var(--surface-hover)] transition-colors border-b border-[var(--border)] last:border-b-0"
+              >
+                <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 bg-[var(--surface-hover)]">
+                  {(player.strCutout || player.strThumb) && (
+                    <img src={player.strCutout || player.strThumb} alt={player.strPlayer} className="w-full h-full object-cover" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{player.strPlayer}</p>
+                  <p className="text-xs text-[var(--muted)]">{player.strTeam} · {player.strPosition}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </form>
 
-      {loading && (
+      {!showSuggestions && loading && (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center gap-3 border border-[var(--border)] bg-[var(--surface)] rounded-2xl p-4">
@@ -103,44 +181,6 @@ export default function SearchPage() {
             </div>
           ))}
         </div>
-      )}
-
-      {mode === "teams" && (
-        <ul className="space-y-3">
-          {teams.map((team) => (
-            <li key={team.idTeam} className="card-hover flex items-center gap-3 border border-[var(--border)] bg-[var(--surface)] rounded-2xl p-4">
-              <Link href={`/team/${team.idTeam}`} className="flex items-center gap-3 flex-1">
-                <div className="w-12 h-12 rounded-full bg-white/5 border border-[var(--border)] flex items-center justify-center overflow-hidden shrink-0">
-                  <img src={team.strBadge} alt={team.strTeam} className="w-8 h-8 object-contain" />
-                </div>
-                <div>
-                  <p className="font-semibold hover:underline">{team.strTeam}</p>
-                  <p className="text-sm text-[var(--muted)]">{team.strLeague}</p>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {mode === "players" && (
-        <ul className="space-y-3">
-          {players.map((player) => (
-            <li key={player.idPlayer} className="card-hover flex items-center gap-3 border border-[var(--border)] bg-[var(--surface)] rounded-2xl p-4">
-              <Link href={`/player/${player.idPlayer}`} className="flex items-center gap-3 flex-1">
-                <div className="w-12 h-12 rounded-full bg-white/5 border border-[var(--border)] flex items-center justify-center overflow-hidden shrink-0">
-                  {(player.strCutout || player.strThumb) && (
-                    <img src={player.strCutout || player.strThumb} alt={player.strPlayer} className="w-full h-full object-cover" />
-                  )}
-                </div>
-                <div>
-                  <p className="font-semibold hover:underline">{player.strPlayer}</p>
-                  <p className="text-sm text-[var(--muted)]">{player.strTeam} · {player.strPosition}</p>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
       )}
     </div>
   );
