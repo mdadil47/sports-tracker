@@ -83,3 +83,7 @@ export async function getCombinedUpcomingEvents(teamIds: string[]) {
   // Sort chronologically
   return unique.sort((a: any, b: any) => a.strTimestamp?.localeCompare(b.strTimestamp));
 }
+export async function getTeamRoster(teamId: string) {
+  const data = await safeFetch(`${BASE_URL}/lookup_all_players.php?id=${teamId}`);
+  return data?.player ?? [];
+}

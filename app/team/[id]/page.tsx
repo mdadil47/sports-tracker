@@ -1,6 +1,25 @@
-import { getTeamById, getLastEvents, getUpcomingEvents } from "@/lib/sportsApi";
+import { getTeamById, getLastEvents, getUpcomingEvents, getTeamRoster } from "@/lib/sportsApi";
 import { notFound } from "next/navigation";
 import { MapPin, TrendingUp, Calendar } from "lucide-react";
+
+function classifyPlayer(position: string, sport: string): string | null {
+  const p = position.toLowerCase();
+  if (p.includes("coach") || p.includes("manager") || p.includes("physio") || p.includes("staff")) return null;
+
+  if (sport === "Cricket") {
+    if (p.includes("wicket")) return "Wicket-Keepers";
+    if (p.includes("all-rounder")) return "All-Rounders";
+    if (p.includes("bowler")) return "Bowlers";
+    if (p.includes("batsman") || p.includes("batter")) return "Batsmen";
+    return "Other";
+  }
+
+  if (p.includes("keeper")) return "Goalkeepers";
+  if (p.includes("back") || p.includes("defender")) return "Defenders";
+  if (p.includes("forward") || p.includes("striker")) return "Forwards";
+  if (p.includes("midfield") || p.includes("wing")) return "Midfielders";
+  return "Other";
+}
 
 export default async function TeamDetailPage({
   params,
@@ -14,14 +33,27 @@ export default async function TeamDetailPage({
     notFound();
   }
 
-  const [lastEvents, upcomingEvents] = await Promise.all([
+  const [lastEvents, upcomingEvents, roster] = await Promise.all([
     getLastEvents(id),
     getUpcomingEvents(id),
+    getTeamRoster(id),
   ]);
+
+  const groupOrder =
+    team.strSport === "Cricket"
+      ? ["Batsmen", "Bowlers", "All-Rounders", "Wicket-Keepers", "Other"]
+      : ["Goalkeepers", "Defenders", "Midfielders", "Forwards", "Other"];
+
+  const grouped: Record<string, any[]> = {};
+  roster.forEach((player: any) => {
+    const group = classifyPlayer(player.strPosition || "", team.strSport);
+    if (!group) return;
+    if (!grouped[group]) grouped[group] = [];
+    grouped[group].push(player);
+  });
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Banner header */}
       <div
         className="h-32 sm:h-40 gradient-bg relative flex items-end p-4 sm:p-8"
         style={{
@@ -106,6 +138,36 @@ export default async function TeamDetailPage({
             </div>
           </div>
         </div>
+
+        {roster.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-lg font-semibold mb-4">Squad</h2>
+            <div className="space-y-6">
+              {groupOrder
+                .filter((group) => grouped[group]?.length > 0)
+                .map((group) => (
+                  <div key={group}>
+                    <p className="text-sm text-[var(--muted)] mb-2 uppercase tracking-wide">{group}</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {grouped[group].map((player: any) => (
+                        <div
+                          key={player.idPlayer}
+                          className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-2"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-[var(--surface-hover)] overflow-hidden shrink-0">
+                            {player.strCutout && (
+                              <img src={player.strCutout} alt={player.strPlayer} className="w-full h-full object-cover" />
+                            )}
+                          </div>
+                          <p className="text-xs font-medium truncate">{player.strPlayer}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
