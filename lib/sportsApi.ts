@@ -99,3 +99,7 @@ export async function getEventStats(eventId: string) {
   const data = await safeFetch(`${BASE_URL}/lookupeventstats.php?id=${eventId}`);
   return data?.eventstats ?? [];
 }
+export async function searchPlayers(name: string) {
+  const data = await safeFetch(`${BASE_URL}/searchplayers.php?p=${encodeURIComponent(name)}`);
+  return data?.player ?? [];
+}

@@ -113,6 +113,7 @@ export default async function MatchDetailPage({
   const homeLineup = lineup.filter((p: any) => p.strHome === "Yes" && p.strSubstitute === "No");
   const awayLineup = lineup.filter((p: any) => p.strHome === "No" && p.strSubstitute === "No");
   const isFootball = event.strSport === "Soccer";
+  const isCricket = event.strSport === "Cricket";
 
   return (
     <div className="p-4 sm:p-8 max-w-2xl mx-auto">
@@ -124,8 +125,13 @@ export default async function MatchDetailPage({
             <img src={event.strHomeTeamBadge} alt={event.strHomeTeam} className="w-12 h-12 object-contain inline-block mb-2" />
             <p className="font-semibold text-sm sm:text-base">{event.strHomeTeam}</p>
           </div>
-          <div className="gradient-text text-2xl sm:text-3xl font-bold px-2">
-            {event.intHomeScore !== null ? `${event.intHomeScore} - ${event.intAwayScore}` : "vs"}
+          <div className="text-center">
+            <div className="gradient-text text-2xl sm:text-3xl font-bold px-2">
+              {event.intHomeScore !== null ? `${event.intHomeScore} - ${event.intAwayScore}` : "vs"}
+            </div>
+            {isCricket && event.intHomeScore !== null && (
+              <p className="text-xs text-[var(--muted)] mt-1">Runs</p>
+            )}
           </div>
           <div className="flex-1 text-left">
             <img src={event.strAwayTeamBadge} alt={event.strAwayTeam} className="w-12 h-12 object-contain inline-block mb-2" />
@@ -144,6 +150,9 @@ export default async function MatchDetailPage({
             </span>
           )}
         </div>
+        {isCricket && event.strResult && (
+          <p className="text-sm gradient-text font-medium mt-4">{event.strResult}</p>
+        )}
       </div>
 
       {/* Match Stats */}
