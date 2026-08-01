@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getUpcomingEvents } from "@/lib/sportsApi";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import UnsaveButton from "@/components/UnsaveButton";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -43,12 +44,12 @@ export default async function DashboardPage() {
           <div key={team.id} className="card-hover border border-[var(--border)] bg-[var(--surface)] rounded-2xl p-5">
             <Link href={`/team/${team.teamId}`} className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-white/5 border border-[var(--border)] flex items-center justify-center overflow-hidden shrink-0">
-                <img src={team.teamBadge ?? ""} alt={team.teamName} className="w-8 h-8 object-contain" />
-              </div>
-              <div>
-                <p className="font-semibold hover:underline">{team.teamName}</p>
-                <p className="text-sm text-[var(--muted)]">{team.teamLeague}</p>
-              </div>
+      <img src={team.teamBadge ?? ""} alt={team.teamName} className="w-8 h-8 object-contain" />
+    </div>
+    <div>
+      <p className="font-semibold hover:underline">{team.teamName}</p>
+      <p className="text-sm text-[var(--muted)]">{team.teamLeague}</p>
+    </div>
             </Link>
 
             {team.upcomingEvents.length === 0 ? (
@@ -56,15 +57,17 @@ export default async function DashboardPage() {
             ) : (
               <ul className="text-sm space-y-2">
                 {team.upcomingEvents.slice(0, 3).map((event: any) => (
-                  <li
-                    key={event.idEvent}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 bg-[var(--background)] rounded-lg px-3 py-2"
-                  >
-                    <span>{event.strHomeTeam} vs {event.strAwayTeam}</span>
-                    <span className="text-[var(--muted)] text-xs">
-                      {event.dateEvent} {event.strTime}
-                    </span>
-                  </li>
+                  <li key={event.idEvent}>
+  <Link
+    href={`/match/${event.idEvent}`}
+    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 bg-[var(--background)] rounded-lg px-3 py-2 hover:bg-[var(--surface-hover)] transition-colors"
+  >
+    <span>{event.strHomeTeam} vs {event.strAwayTeam}</span>
+    <span className="text-[var(--muted)] text-xs">
+      {event.dateEvent} {event.strTime}
+    </span>
+  </Link>
+</li>
                 ))}
               </ul>
             )}

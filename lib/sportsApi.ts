@@ -59,3 +59,27 @@ export async function getTeamEventsToday(teamId: string) {
   const all = [...upcoming, ...last];
   return all.filter((event: any) => event.dateEvent === today);
 }
+export async function getEventById(eventId: string) {
+  const data = await safeFetch(`${BASE_URL}/lookupevent.php?id=${eventId}`);
+  return data?.events?.[0] ?? null;
+}
+
+export async function getLineup(eventId: string) {
+  const data = await safeFetch(`${BASE_URL}/lookuplineup.php?id=${eventId}`);
+  return data?.lineup ?? [];
+}
+export async function getCombinedUpcomingEvents(teamIds: string[]) {
+  const allEvents = await Promise.all(teamIds.map((id) => getUpcomingEvents(id)));
+  const flattened = allEvents.flat();
+
+  // Dedupe: a match between two tracked teams (e.g. India vs Australia) appears in both team's lists
+  const seen = new Set<string>();
+  const unique = flattened.filter((event: any) => {
+    if (seen.has(event.idEvent)) return false;
+    seen.add(event.idEvent);
+    return true;
+  });
+
+  // Sort chronologically
+  return unique.sort((a: any, b: any) => a.strTimestamp?.localeCompare(b.strTimestamp));
+}
